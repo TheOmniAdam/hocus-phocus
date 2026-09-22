@@ -1,14 +1,26 @@
-function ActivityCard() {
+type ActivityCardProps = {
+    name: string,
+    category: string,
+    duration: number
+}
+
+function ActivityCard(
+    {
+        name,
+        category,
+        duration
+    }: ActivityCardProps
+) {
     return(
         <>
             <p>
-                Apply to Acme Corp 
+                {name}
             </p>
             <p>
-                Career
+                {category}
             </p>
             <p>
-                45 minutes
+                {duration}
             </p>
         </>
     )
