@@ -3,5 +3,13 @@ export type Activity = {
     name: string
     category: string
     duration: number
-    completed: boolean
+    status: ActivityStatus
+    archived: boolean
 }
+
+// TODO: Generate API types from FastAPI OpenAPI schema
+export type ActivityStatus =
+  | 'active'
+  | 'completed'
+  | 'abandoned'
+  | 'invalidated'

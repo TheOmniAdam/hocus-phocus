@@ -3,28 +3,39 @@ type ActivityCardProps = {
     name: string
     category: string
     duration: number
-    completed: boolean
-    onComplete: (id: number) => void
+    status: string
+    onStatusUpdate: (id: number, status: string) => void
+    onArchive: (id: number) => void
     onDelete: (id: number) => void
 }
 
-function isCompleted(completed: boolean) {
-    return completed ? '✓' : 'X'
-}   
+function getStatusIcon(status: string) {
+    switch (status) {
+        case 'completed':
+            return '✓'
+        case 'abandoned':
+            return '✗'
+        case 'invalidated':
+            return '!'
+        default:
+            return ''
+    }
+}
 
 function ActivityCard({
     id,
     name,
     category,
     duration,
-    completed,
-    onComplete,
+    status,
+    onStatusUpdate,
+    onArchive,
     onDelete,
 }: ActivityCardProps) {
     return(
         <>
             <p>
-                {name} {isCompleted(completed)}
+                {getStatusIcon(status)} {name}
             </p>
             <p>
                 {category}
@@ -32,8 +43,17 @@ function ActivityCard({
             <p>
                 {duration}
             </p>
-            <button onClick={() => onComplete(id)}>
+            <button onClick={() => onStatusUpdate(id, 'completed')}>
                 Complete
+            </button>
+            <button onClick={() => onStatusUpdate(id, 'abandoned')}>
+                Abandon
+            </button>
+            <button onClick={() => onStatusUpdate(id, 'invalidated')}>
+                Invalidate
+            </button>
+            <button onClick={() => onArchive(id)}>
+                Archive
             </button>
             <button onClick={() => onDelete(id)}>
                 Remove

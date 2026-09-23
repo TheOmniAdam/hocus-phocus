@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import ActivityCard from './components/ActivityCard'
 import ActivityForm from './components/ActivityForm'
-import type { Activity } from './types/Activity'
+import type { Activity, ActivityStatus } from './types/Activity'
 import './App.css'
 
 const initialActivities: Activity[] = [
@@ -10,21 +10,24 @@ const initialActivities: Activity[] = [
     name: 'Apply to Acme Corp',
     category: 'Career',
     duration: 45,
-    completed: false,
+    status: 'active',
+    archived: false,
   },
   {
     id: 2,
     name: 'Learn React Components',
     category: 'Learning',
     duration: 30,
-    completed: false,
+    status: 'active',
+    archived: false,
   },
   {
     id: 3,
     name: 'Do Laundry',
     category: 'Home',
     duration: 20,
-    completed: false,
+    status: 'active',
+    archived: false,
   },
 ]
 
@@ -42,17 +45,29 @@ function App() {
             name,
             category,
             duration,
-            completed: false,
+            status: 'active',
+            archived: false,
         }
 
         setActivities([...activities, newActivity])
     }
 
-    function handleCompleteActivity(id: number) {
+    function handleUpdateStatusActivity(id: number, status: ActivityStatus) {
         setActivities(
             activities.map((activity) => {
                 if (activity.id === id) {
-                    return { ...activity, completed: true }
+                    return { ...activity, status }
+                }
+                return activity
+            })
+        )
+    }
+
+    function handleArchiveActivity(id: number) {
+        setActivities(
+            activities.map((activity) => {
+                if (activity.id === id) {
+                    return { ...activity, archived: true }
                 }
                 return activity
             })
@@ -85,8 +100,9 @@ function App() {
                     name={activity.name}
                     category={activity.category}
                     duration={activity.duration}
-                    completed={activity.completed}
-                    onComplete={handleCompleteActivity}
+                    status={activity.status}
+                    onStatusUpdate={handleUpdateStatusActivity}
+                    onArchive={handleArchiveActivity}
                     onDelete={handleDeleteActivity}
                 />
             ))}
