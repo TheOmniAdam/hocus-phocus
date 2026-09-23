@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 
-from app.models.activity import Activity, ActivityCreate, ActivityDelete, ActivityStatusUpdate
+from app.models.activity import Activity, ActivityCreate, ActivityStatusUpdate
 
 app = FastAPI(
     title="Hocus PHocus API",
@@ -56,7 +56,6 @@ def update_activity_status(
 
 @app.patch("/activities/{activity_id}/archive")
 def archive_activity(activity_id: int):
-    global activities
 
     activity = next(
         (activity for activity in activities if activity.id == activity_id),

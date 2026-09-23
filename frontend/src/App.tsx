@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ActivityCard from './components/ActivityCard'
 import ActivityForm from './components/ActivityForm'
 import type { Activity, ActivityStatus } from './types/Activity'
@@ -56,7 +56,7 @@ function App() {
         setActivities(
             activities.map((activity) => {
                 if (activity.id === id) {
-                    return { ...activity, status }
+                    return { ...activity, status: status }
                 }
                 return activity
             })

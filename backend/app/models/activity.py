@@ -26,4 +26,5 @@ class Activity(BaseModel):
     name: str
     category: str
     duration: int
-    status: str = 'active'
+    status: ActivityStatus = ActivityStatus.ACTIVE
+    archived: bool = False
