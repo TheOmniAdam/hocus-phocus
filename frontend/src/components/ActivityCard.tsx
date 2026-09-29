@@ -1,12 +1,13 @@
 type ActivityCardProps = {
-    id: number
+    id: string
     name: string
     category: string
     duration: number
-    status: string
-    onStatusUpdate: (id: number, status: string) => void
-    onArchive: (id: number) => void
-    onDelete: (id: number) => void
+    status: ActivityStatus
+    archived: boolean
+    onStatusUpdate: (id: string, status: ActivityStatus) => void
+    onArchive: (id: string) => void
+    onDelete: (id: string) => void
 }
 
 function getStatusIcon(status: string) {
@@ -28,6 +29,7 @@ function ActivityCard({
     category,
     duration,
     status,
+    archived,
     onStatusUpdate,
     onArchive,
     onDelete,

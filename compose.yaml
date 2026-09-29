@@ -1,0 +1,15 @@
+services:
+  mongodb:
+    image: mongo:8
+    container_name: hocus-phocus-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: hocus
+      MONGO_INITDB_ROOT_PASSWORD: phocus
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:

@@ -15,14 +15,9 @@ class ActivityCreate(BaseModel):
 class ActivityStatusUpdate(BaseModel):
     status: ActivityStatus
 
-class ActivityArchive(BaseModel):
-    id: int
-
-class ActivityDelete(BaseModel):
-    id: int
-
 class Activity(BaseModel):
-    id: int
+    id: str
+    user_id: str
     name: str
     category: str
     duration: int
