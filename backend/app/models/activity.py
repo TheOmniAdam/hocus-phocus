@@ -23,3 +23,4 @@ class Activity(BaseModel):
     duration: int
     status: ActivityStatus = ActivityStatus.ACTIVE
     archived: bool = False
+

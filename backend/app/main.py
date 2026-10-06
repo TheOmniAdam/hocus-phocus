@@ -1,7 +1,18 @@
+import os
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.models.activity import Activity, ActivityCreate, ActivityStatusUpdate
+from bson import ObjectId
+from bson.errors import InvalidId
+
+from app.database import activities_collection
+from app.models.activity import (
+    Activity,
+    ActivityCreate,
+    ActivityStatus,
+    ActivityStatusUpdate,
+)
 
 app = FastAPI(
     title="Hocus PHocus API",
@@ -27,82 +38,136 @@ def health_check():
 
 @app.get("/activities")
 def get_activities():
+    user_id = os.environ["DEV_USER_ID"]
+
+    documents = activities_collection.find({
+        "user_id": user_id,
+        "archived": False,
+    })
+
+    activities = []
+
+    for document in documents:
+        activities.append(
+            Activity(
+                id=str(document["_id"]),
+                user_id=document["user_id"],
+                name=document["name"],
+                category=document["category"],
+                duration=document["duration"],
+                status=document["status"],
+                archived=document["archived"],
+            )
+        )
+
     return activities
 
 @app.post("/activities", status_code=201)
 def create_activity(activity: ActivityCreate):
-    new_activity = Activity(
-        id=len(activities) + 1,
-        name=activity.name,
-        category=activity.category,
-        duration=activity.duration,
+    document = {
+        "user_id": os.environ["DEV_USER_ID"],
+        "name": activity.name,
+        "category": activity.category,
+        "duration": activity.duration,
+        "status": ActivityStatus.ACTIVE.value,
+        "archived": False,
+    }
+
+    result = activities_collection.insert_one(document)
+
+    return Activity(
+        id=str(result.inserted_id),
+        **document,
     )
-
-    activities.append(new_activity)
-
-    return new_activity
 
 @app.patch("/activities/{activity_id}/status")
 def update_activity_status(
-    activity_id: int,
+    activity_id: str,
     status_update: ActivityStatusUpdate,
 ):
-    activity = next(
-        (
-            activity
-            for activity in activities
-            if activity.id == activity_id
-        ),
-        None,
+    try:
+        object_id = ObjectId(activity_id)
+    except InvalidId:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    user_id = os.environ["DEV_USER_ID"]
+
+    result = activities_collection.find_one_and_update(
+        {
+            "_id": object_id,
+            "user_id": user_id,
+        },
+        {
+            "$set": {
+                "status": status_update.status.value,
+            }
+        },
+        return_document=True,
     )
 
-    if activity is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Activity not found",
-        )
+    if result is None:
+        raise HTTPException(status_code=404, detail="Activity not found")
 
-    activity.status = status_update.status
-
-    return activity
+    return Activity(
+        id=str(result["_id"]),
+        user_id=result["user_id"],
+        name=result["name"],
+        category=result["category"],
+        duration=result["duration"],
+        status=result["status"],
+        archived=result["archived"],
+    )
 
 @app.patch("/activities/{activity_id}/archive")
-def archive_activity(activity_id: int):
+def archive_activity(activity_id: str):
+    try:
+        object_id = ObjectId(activity_id)
+    except InvalidId:
+        raise HTTPException(status_code=404, detail="Activity not found")
 
-    activity = next(
-        (activity for activity in activities if activity.id == activity_id),
-        None,
+    user_id = os.environ["DEV_USER_ID"]
+
+    result = activities_collection.find_one_and_update(
+        {
+            "_id": object_id,
+            "user_id": user_id,
+        },
+        {
+            "$set": {
+                "archived": True,
+            }
+        },
+        return_document=True,
     )
 
-    if activity is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Activity not found",
-        )
+    if result is None:
+        raise HTTPException(status_code=404, detail="Activity not found")
 
-    activity.archived = True
-
-    return activity  
+    return Activity(
+        id=str(result["_id"]),
+        user_id=result["user_id"],
+        name=result["name"],
+        category=result["category"],
+        duration=result["duration"],
+        status=result["status"],
+        archived=result["archived"],
+    ) 
 
 @app.delete("/activities/{activity_id}")
-def delete_activity(activity_id: int):
-    global activities
+def delete_activity(activity_id: str):
+    try:
+        object_id = ObjectId(activity_id)
+    except InvalidId:
+        raise HTTPException(status_code=404, detail="Activity not found")
 
-    activity = next(
-        (activity for activity in activities if activity.id == activity_id),
-        None,
-    )
+    user_id = os.environ["DEV_USER_ID"]
 
-    if activity is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Activity not found",
-        )
+    result = activities_collection.delete_one({
+        "_id": object_id,
+        "user_id": user_id,
+    })
 
-    activities = [
-        activity
-        for activity in activities
-        if activity.id != activity_id
-    ]
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Activity not found")
 
     return {"message": "Activity deleted"}

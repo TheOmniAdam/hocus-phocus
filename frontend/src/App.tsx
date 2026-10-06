@@ -57,118 +57,110 @@ function App() {
     category: string,
     duration: number
   ) {
-  const response = await fetch(
-    apiActivitiesUrl,
-    {
-      method: 'POST',
-      headers: {
-      'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name,
-        category,
-        duration,
-      }),
+    const response = await fetch(
+      apiActivitiesUrl,
+      {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          category,
+          duration,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      console.error('Failed to create activity')
+      return
     }
-  )
 
-  if (!response.ok) {
-    console.error('Failed to create activity')
-    return
+    const newActivity: Activity = await response.json()
+
+    setActivities((currentActivities) => [
+      ...currentActivities,
+      newActivity,
+    ])
   }
-
-  const newActivity: Activity = await response.json()
-
-  setActivities((currentActivities) => [
-    ...currentActivities,
-    newActivity,
-  ])
-  }
-
-  // function handleUpdateStatusActivity(id: string, status: ActivityStatus) {
-  //   setActivities(
-  //     activities.map((activity) => {
-  //       if (activity.id === id) {
-  //         return { ...activity, status: status }
-  //       }
-  //       return activity
-  //     })
-  //   )
-  // }
 
   async function handleUpdateStatusActivity(
-  id: string,
-  status: ActivityStatus
-) {
-  const response = await fetch(
-    `${apiActivitiesUrl}/${id}/status`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        status,
-      }),
-    }
-  )
-
-  if (!response.ok) {
-    console.error('Failed to update activity status')
-    return
-  }
-
-  const updatedActivity: Activity = await response.json()
-
-  setActivities((currentActivities) =>
-    currentActivities.map((activity) =>
-      activity.id === updatedActivity.id
-        ? updatedActivity
-        : activity
+    id: string,
+    status: ActivityStatus
+  ) {
+    const response = await fetch(
+      `${apiActivitiesUrl}/${id}/status`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status,
+        }),
+      }
     )
-  )
-}
 
-  // function handleArchiveActivity(id: number) {
-  //   setActivities(
-  //     activities.map((activity) => {
-  //       if (activity.id === id) {
-  //         return { ...activity, archived: true }
-  //       }
-  //       return activity
-  //     })
-  //   )
-  // }
+    if (!response.ok) {
+      console.error('Failed to update activity status')
+      return
+    }
+
+    const updatedActivity: Activity = await response.json()
+
+    setActivities((currentActivities) =>
+      currentActivities.map((activity) =>
+        activity.id === updatedActivity.id
+          ? updatedActivity
+          : activity
+      )
+    )
+  }
 
   async function handleArchiveActivity(id: string) {
+    const response = await fetch(
+      `${apiActivitiesUrl}/${id}/archive`,
+      {
+        method: 'PATCH',
+      }
+    )
+
+    if (!response.ok) {
+      console.error('Failed to archive activity')
+      return
+    }
+
+    const updatedActivity: Activity = await response.json()
+
+    setActivities((currentActivities) =>
+      currentActivities.map((activity) =>
+        activity.id === updatedActivity.id
+          ? updatedActivity
+          : activity
+      )
+    )
+  }
+
+  async function handleDeleteActivity(id: string) {
   const response = await fetch(
-    `${apiActivitiesUrl}/${id}/archive`,
+    `${apiActivitiesUrl}/${id}`,
     {
-      method: 'PATCH',
+      method: 'DELETE',
     }
   )
 
   if (!response.ok) {
-    console.error('Failed to archive activity')
+    console.error('Failed to delete activity')
     return
   }
 
-  const updatedActivity: Activity = await response.json()
-
   setActivities((currentActivities) =>
-    currentActivities.map((activity) =>
-      activity.id === updatedActivity.id
-        ? updatedActivity
-        : activity
+    currentActivities.filter(
+      (activity) => activity.id !== id
     )
   )
 }
-
-  function handleDeleteActivity(id: string) {
-    setActivities(
-      activities.filter((activity) => activity.id !== id)
-    )
-  }
 
   return (
     <>
@@ -183,20 +175,23 @@ function App() {
         <section>
             <h2>Today's Activities</h2>
 
-            {activities.map((activity) => (
+            {activities
+              .filter((activity) => !activity.archived)
+              .map((activity) => (
                 <ActivityCard
-                    key={activity.id}
-                    id={activity.id}
-                    name={activity.name}
-                    category={activity.category}
-                    duration={activity.duration}
-                    status={activity.status}
-                    archived={activity.archived}
-                    onStatusUpdate={handleUpdateStatusActivity}
-                    onArchive={handleArchiveActivity}
-                    onDelete={handleDeleteActivity}
+                  key={activity.id}
+                  id={activity.id}
+                  name={activity.name}
+                  category={activity.category}
+                  duration={activity.duration}
+                  status={activity.status}
+                  archived={activity.archived}
+                  onStatusUpdate={handleUpdateStatusActivity}
+                  onArchive={handleArchiveActivity}
+                  onDelete={handleDeleteActivity}
                 />
-            ))}
+              ))
+            }
         </section>
     </main>
     </>
