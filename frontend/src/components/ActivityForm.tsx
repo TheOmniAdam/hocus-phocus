@@ -5,26 +5,33 @@ type ActivityFormProps = {
         name: string,
         category: string,
         duration: number
-    ) => void
+    ) => Promise<boolean>
 }
+
 
 function ActivityForm({ onAddActivity }: ActivityFormProps) {
     const [name, setName] = useState('')
     const [category, setCategory] = useState('')
     const [duration, setDuration] = useState('')
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
 
         if (!name || !category || !duration) {
             return
         }
 
-        onAddActivity(name, category, Number(duration))
+        const activityCreated = await onAddActivity(
+            name,
+            category,
+            Number(duration)
+        )
 
-        setName('')
-        setCategory('')
-        setDuration('')
+        if (activityCreated) {
+            setName('')
+            setCategory('')
+            setDuration('')
+        }
     }
 
     return (

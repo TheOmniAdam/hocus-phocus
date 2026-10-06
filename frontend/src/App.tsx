@@ -6,33 +6,6 @@ import './App.css'
 
 const apiActivitiesUrl = 'http://localhost:8000/activities'
 
-const initialActivities: Activity[] = [
-  {
-    id: 1,
-    name: 'Apply to Acme Corp',
-    category: 'Career',
-    duration: 45,
-    status: 'active',
-    archived: false,
-  },
-  {
-    id: 2,
-    name: 'Learn React Components',
-    category: 'Learning',
-    duration: 30,
-    status: 'active',
-    archived: false,
-  },
-  {
-    id: 3,
-    name: 'Do Laundry',
-    category: 'Home',
-    duration: 20,
-    status: 'active',
-    archived: false,
-  },
-]
-
 function App() {
   const [activities, setActivities] =
   useState<Activity[]>([])
@@ -56,7 +29,7 @@ function App() {
     name: string,
     category: string,
     duration: number
-  ) {
+  ): Promise<boolean> {
     const response = await fetch(
       apiActivitiesUrl,
       {
@@ -74,7 +47,7 @@ function App() {
 
     if (!response.ok) {
       console.error('Failed to create activity')
-      return
+      return false
     }
 
     const newActivity: Activity = await response.json()
@@ -83,6 +56,7 @@ function App() {
       ...currentActivities,
       newActivity,
     ])
+    return true
   }
 
   async function handleUpdateStatusActivity(

@@ -19,6 +19,17 @@ app = FastAPI(
     version="0.1.0",
 )
 
+def document_to_activity(document: dict) -> Activity:
+    return Activity(
+        id=str(document["_id"]),
+        user_id=document["user_id"],
+        name=document["name"],
+        category=document["category"],
+        duration=document["duration"],
+        status=document["status"],
+        archived=document["archived"],
+    )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -45,22 +56,10 @@ def get_activities():
         "archived": False,
     })
 
-    activities = []
-
-    for document in documents:
-        activities.append(
-            Activity(
-                id=str(document["_id"]),
-                user_id=document["user_id"],
-                name=document["name"],
-                category=document["category"],
-                duration=document["duration"],
-                status=document["status"],
-                archived=document["archived"],
-            )
-        )
-
-    return activities
+    return [
+        document_to_activity(document)
+        for document in documents
+    ]
 
 @app.post("/activities", status_code=201)
 def create_activity(activity: ActivityCreate):
@@ -108,15 +107,7 @@ def update_activity_status(
     if result is None:
         raise HTTPException(status_code=404, detail="Activity not found")
 
-    return Activity(
-        id=str(result["_id"]),
-        user_id=result["user_id"],
-        name=result["name"],
-        category=result["category"],
-        duration=result["duration"],
-        status=result["status"],
-        archived=result["archived"],
-    )
+    return document_to_activity(result)
 
 @app.patch("/activities/{activity_id}/archive")
 def archive_activity(activity_id: str):
@@ -143,15 +134,7 @@ def archive_activity(activity_id: str):
     if result is None:
         raise HTTPException(status_code=404, detail="Activity not found")
 
-    return Activity(
-        id=str(result["_id"]),
-        user_id=result["user_id"],
-        name=result["name"],
-        category=result["category"],
-        duration=result["duration"],
-        status=result["status"],
-        archived=result["archived"],
-    ) 
+    return document_to_activity(result)
 
 @app.delete("/activities/{activity_id}")
 def delete_activity(activity_id: str):
