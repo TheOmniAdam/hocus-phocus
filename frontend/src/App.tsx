@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import ActivityCard from './components/ActivityCard'
 import ActivityForm from './components/ActivityForm'
+import ActivitySummary from './components/ActivitySummary'
+import type { ActivitySummary as ActivitySummaryType } from './types/ActivitySummary'
 import type { Activity, ActivityStatus } from './types/Activity'
+import DailyBudget from './components/DailyBudget'
 import './App.css'
 
 const apiActivitiesUrl = 'http://localhost:8000/activities'
@@ -9,6 +12,8 @@ const apiActivitiesUrl = 'http://localhost:8000/activities'
 function App() {
   const [activities, setActivities] =
   useState<Activity[]>([])
+  const [summary, setSummary] = useState<ActivitySummaryType | null>(null)
+  const [dailyBudget, setDailyBudget] = useState<number>(180)
 
   useEffect(() => {
     async function loadActivities() {
@@ -22,7 +27,23 @@ function App() {
     }
 
     loadActivities()
+    void loadSummary()
   }, [])
+
+  async function loadSummary() {
+    try {
+      const response = await fetch(`${apiActivitiesUrl}/summary`)
+
+      if (!response.ok) {
+        throw new Error('Failed to load activity summary')
+      }
+
+      const data: ActivitySummaryType = await response.json()
+      setSummary(data)
+    } catch (error) {
+      console.error('Could not load summary:', error)
+    }
+  }
 
 
   async function handleAddActivity(
@@ -56,6 +77,7 @@ function App() {
       ...currentActivities,
       newActivity,
     ])
+    await loadSummary()
     return true
   }
 
@@ -90,6 +112,7 @@ function App() {
           : activity
       )
     )
+    await loadSummary()
   }
 
   async function handleArchiveActivity(id: string) {
@@ -114,27 +137,29 @@ function App() {
           : activity
       )
     )
+    await loadSummary()
   }
 
   async function handleDeleteActivity(id: string) {
-  const response = await fetch(
-    `${apiActivitiesUrl}/${id}`,
-    {
-      method: 'DELETE',
-    }
-  )
-
-  if (!response.ok) {
-    console.error('Failed to delete activity')
-    return
-  }
-
-  setActivities((currentActivities) =>
-    currentActivities.filter(
-      (activity) => activity.id !== id
+    const response = await fetch(
+      `${apiActivitiesUrl}/${id}`,
+      {
+        method: 'DELETE',
+      }
     )
-  )
-}
+
+    if (!response.ok) {
+      console.error('Failed to delete activity')
+      return
+    }
+
+    setActivities((currentActivities) =>
+      currentActivities.filter(
+        (activity) => activity.id !== id
+      )
+    )
+    await loadSummary()
+  }
 
   return (
     <>
@@ -145,7 +170,16 @@ function App() {
 
     <main>
         <ActivityForm onAddActivity={handleAddActivity} />
+        {summary && <ActivitySummary summary={summary} />}
 
+        {summary && (
+          <DailyBudget
+            availableMinutes={dailyBudget}
+            plannedMinutes={summary.total_minutes}
+            onBudgetChange={setDailyBudget}
+          />
+        )}
+        
         <section>
             <h2>Today's Activities</h2>
 

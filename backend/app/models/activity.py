@@ -24,3 +24,6 @@ class Activity(BaseModel):
     status: ActivityStatus = ActivityStatus.ACTIVE
     archived: bool = False
 
+class ActivitySummary(BaseModel):
+    activity_count: int
+    total_minutes: int

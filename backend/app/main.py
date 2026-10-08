@@ -10,6 +10,7 @@ from app.database import activities_collection
 from app.models.activity import (
     Activity,
     ActivityCreate,
+    ActivitySummary,
     ActivityStatus,
     ActivityStatusUpdate,
 )
@@ -60,6 +61,40 @@ def get_activities():
         document_to_activity(document)
         for document in documents
     ]
+
+@app.get("/activities/summary", response_model=ActivitySummary)
+def get_activity_summary():
+    user_id = os.environ["DEV_USER_ID"]
+
+    pipeline = [
+        {
+            "$match": {
+                "user_id": user_id,
+                "archived": False,
+                "status": ActivityStatus.ACTIVE.value,
+            }
+        },
+        {
+            "$group": {
+                "_id": None,
+                "activity_count": {"$sum": 1},
+                "total_minutes": {"$sum": "$duration"},
+            }
+        },
+    ]
+
+    results = list(activities_collection.aggregate(pipeline))
+
+    if not results:
+        return ActivitySummary(
+            activity_count=0,
+            total_minutes=0,
+        )
+
+    return ActivitySummary(
+        activity_count=results[0]["activity_count"],
+        total_minutes=results[0]["total_minutes"],
+    )
 
 @app.post("/activities", status_code=201)
 def create_activity(activity: ActivityCreate):
