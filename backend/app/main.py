@@ -15,6 +15,8 @@ from app.models.activity import (
     ActivityStatusUpdate,
 )
 
+from datetime import date
+
 app = FastAPI(
     title="Hocus PHocus API",
     version="0.1.0",
@@ -27,6 +29,7 @@ def document_to_activity(document: dict) -> Activity:
         name=document["name"],
         category=document["category"],
         duration=document["duration"],
+        scheduled_date=document.get("scheduled_date"),
         status=document["status"],
         archived=document["archived"],
     )
@@ -63,7 +66,7 @@ def get_activities():
     ]
 
 @app.get("/activities/summary", response_model=ActivitySummary)
-def get_activity_summary():
+def get_activity_summary(scheduled_date: date):
     user_id = os.environ["DEV_USER_ID"]
 
     pipeline = [
@@ -72,6 +75,7 @@ def get_activity_summary():
                 "user_id": user_id,
                 "archived": False,
                 "status": ActivityStatus.ACTIVE.value,
+                "scheduled_date": scheduled_date.isoformat(),
             }
         },
         {
@@ -103,6 +107,7 @@ def create_activity(activity: ActivityCreate):
         "name": activity.name,
         "category": activity.category,
         "duration": activity.duration,
+        "scheduled_date": activity.scheduled_date.isoformat(),
         "status": ActivityStatus.ACTIVE.value,
         "archived": False,
     }
