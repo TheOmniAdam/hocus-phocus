@@ -1,3 +1,5 @@
+import './ActivityCard.css'
+
 type ActivityCardProps = {
     id: string
     name: string
@@ -35,7 +37,7 @@ function ActivityCard({
     onDelete,
 }: ActivityCardProps) {
     return(
-        <article>
+        <article className="activity-card">
             <div className="activity-card__details">
                 <p>
                     {getStatusIcon(status)} {name}

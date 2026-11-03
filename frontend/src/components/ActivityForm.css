@@ -30,7 +30,7 @@
   width: min(100%, 420px);
 }
 
-.planner-content button {
+.planner-content form button {
   width: auto;
   display: inline-flex;
   align-items: center;
@@ -44,6 +44,6 @@
   font-weight: 600;
 }
 
-.planner-content button:hover {
+.planner-content form button:hover {
   filter: brightness(0.92);
 }
