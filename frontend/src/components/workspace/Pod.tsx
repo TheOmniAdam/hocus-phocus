@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export type PodPresentation = 'focused' | 'background'
 
@@ -18,6 +19,28 @@ export default function Pod({
   children,
 }: PodProps) {
   const isFocused = presentation === 'focused'
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [contentHeight, setContentHeight] = useState(0)
+
+  useEffect(() => {
+    const element = contentRef.current
+    if (!element) return
+
+    const observer = new ResizeObserver(() => {
+      setContentHeight(element.scrollHeight)
+    })
+
+    observer.observe(element)
+    setContentHeight(element.scrollHeight)
+
+    return () => observer.disconnect()
+  }, [])
+  
+  const previewScale = 0.5
+  const previewHeight = Math.min(
+    350,
+    Math.max(120, contentHeight * previewScale)
+  )
 
   return (
     <section
@@ -26,20 +49,37 @@ export default function Pod({
     >
       <header className="workspace-pod__header">
         <h2>{title}</h2>
-
-        {!isFocused && (
-          <button type="button" onClick={() => onFocus(id)}>
-            Focus
-          </button>
-        )}
       </header>
 
-      <div
-        className="workspace-pod__content"
-        inert={!isFocused}
+      <div 
+        className="workspace-pod__viewport"
+        style={
+          isFocused
+            ? undefined
+            : { height: `${previewHeight}px` }
+        }
       >
-        {children}
+        <div
+          className="workspace-pod__content"
+          ref={contentRef}
+          inert={!isFocused}
+        >
+          {children}
+        </div>
       </div>
+
+      {!isFocused && (
+        <button
+          type="button"
+          className="workspace-pod__focus-overlay"
+          aria-label={`Focus ${title}`}
+          onClick={() => onFocus(id)}
+        >
+          <span className="workspace-pod__focus-label">
+            Open {title}
+          </span>
+        </button>
+      )}
     </section>
   )
 }
