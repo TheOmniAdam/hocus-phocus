@@ -5,6 +5,8 @@ import ActivitySummary from './components/ActivitySummary'
 import type { ActivitySummary as ActivitySummaryType } from './types/ActivitySummary'
 import type { Activity, ActivityStatus } from './types/Activity'
 import DailyBudget from './components/DailyBudget'
+import Workspace from './components/workspace/Workspace'
+import './styles/workspace.css'
 import './App.css'
 
 const apiActivitiesUrl = 'http://localhost:8000/activities'
@@ -14,25 +16,72 @@ function App() {
   useState<Activity[]>([])
   const [summary, setSummary] = useState<ActivitySummaryType | null>(null)
   const [dailyBudget, setDailyBudget] = useState<number>(180)
+  const [selectedDate, setSelectedDate] = useState<string>(
+    () => {
+      const now = new Date();
+      const localDate = new Date(
+        now.getTime() - now.getTimezoneOffset() * 60_000
+      );
+      return localDate.toISOString().slice(0, 10);
+    }
+  );
 
   useEffect(() => {
     async function loadActivities() {
-      const response = await fetch(
-        apiActivitiesUrl
-      )
+      try {
+        const response = await fetch(apiActivitiesUrl)
 
-      const data: Activity[] = await response.json()
+        if (!response.ok) {
+          throw new Error('Failed to load activities')
+        }
 
-      setActivities(data)
+        const data: Activity[] = await response.json()
+        setActivities(data)
+      } catch (error) {
+        console.error('Could not load activities:', error)
+      }
     }
 
-    loadActivities()
-    void loadSummary()
+    void loadActivities()
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function refreshSummary() {
+      try {
+        const response = await fetch(
+          `${apiActivitiesUrl}/summary?scheduled_date=${selectedDate}`
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to load activity summary')
+        }
+
+        const data: ActivitySummaryType = await response.json()
+
+        if (!cancelled) {
+          setSummary(data)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('Could not load summary:', error)
+          setSummary(null)
+        }
+      }
+    }
+
+    setSummary(null)
+    void refreshSummary()
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedDate])
 
   async function loadSummary() {
     try {
-      const response = await fetch(`${apiActivitiesUrl}/summary`)
+      const response = await fetch(`${apiActivitiesUrl}/summary?scheduled_date=${selectedDate}`)
 
       if (!response.ok) {
         throw new Error('Failed to load activity summary')
@@ -62,6 +111,7 @@ function App() {
           name,
           category,
           duration,
+          scheduled_date: selectedDate,
         }),
       }
     )
@@ -161,6 +211,12 @@ function App() {
     await loadSummary()
   }
 
+  const activitiesForSelectedDate = activities.filter(
+    (activity) =>
+      !activity.archived &&
+      activity.scheduled_date === selectedDate
+  )
+
   return (
     <>
     <header>
@@ -169,38 +225,76 @@ function App() {
     </header>
 
     <main>
-        <ActivityForm onAddActivity={handleAddActivity} />
-        {summary && <ActivitySummary summary={summary} />}
+      <Workspace
+        pods={[
+          {
+            id: 'planner',
+            title: 'Daily Planner',
+            content: (
+              <div className="planner-content">
+                <div className="planner-date">
+                  <label htmlFor="planning-date">Planning date</label>
+                  <input
+                    id="planning-date"
+                    type="date"
+                    value={selectedDate}
+                    onChange={(event) => setSelectedDate(event.target.value)}
+                  />
+                </div>
 
-        {summary && (
-          <DailyBudget
-            availableMinutes={dailyBudget}
-            plannedMinutes={summary.total_minutes}
-            onBudgetChange={setDailyBudget}
-          />
-        )}
-        
-        <section>
-            <h2>Today's Activities</h2>
+                <ActivityForm onAddActivity={handleAddActivity} />
+                {summary && <ActivitySummary summary={summary} />}
 
-            {activities
-              .filter((activity) => !activity.archived)
-              .map((activity) => (
-                <ActivityCard
-                  key={activity.id}
-                  id={activity.id}
-                  name={activity.name}
-                  category={activity.category}
-                  duration={activity.duration}
-                  status={activity.status}
-                  archived={activity.archived}
-                  onStatusUpdate={handleUpdateStatusActivity}
-                  onArchive={handleArchiveActivity}
-                  onDelete={handleDeleteActivity}
-                />
-              ))
-            }
-        </section>
+                {summary && (
+                  <DailyBudget
+                    availableMinutes={dailyBudget}
+                    plannedMinutes={summary.total_minutes}
+                    onBudgetChange={setDailyBudget}
+                  />
+                )}
+                
+                <section>
+                    <h2>Activities for {selectedDate}</h2>
+
+                    {activitiesForSelectedDate.map((activity) => (
+                        <ActivityCard
+                          key={activity.id}
+                          id={activity.id}
+                          name={activity.name}
+                          category={activity.category}
+                          duration={activity.duration}
+                          status={activity.status}
+                          archived={activity.archived}
+                          onStatusUpdate={handleUpdateStatusActivity}
+                          onArchive={handleArchiveActivity}
+                          onDelete={handleDeleteActivity}
+                        />
+                      ))
+                    }
+                </section>
+              </div>
+            ),
+          },
+          {
+            id: 'todo',
+            title: 'General To-Do',
+            content: (
+              <div>
+                <p>Your general task list will live here.</p>
+              </div>
+            ),
+          },
+          {
+            id: 'templates',
+            title: 'Templates',
+            content: (
+              <div>
+                <p>Reusable activity templates will live here.</p>
+              </div>
+            ),
+          },
+        ]}
+      />
     </main>
     </>
   )

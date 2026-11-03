@@ -6,6 +6,7 @@ export type Activity = {
   duration: number
   status: ActivityStatus
   archived: boolean
+  scheduled_date: string | null;
 }
 // TODO: Generate API types from FastAPI OpenAPI schema
 export type ActivityStatus =
