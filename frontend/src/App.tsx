@@ -6,6 +6,8 @@ import type { ActivitySummary as ActivitySummaryType } from './types/ActivitySum
 import type { Activity, ActivityStatus } from './types/Activity'
 import DailyBudget from './components/DailyBudget'
 import Workspace from './components/workspace/Workspace'
+import './components/ActivityCard.css'
+import './components/ActivityForm.css'
 import './styles/workspace.css'
 import './App.css'
 

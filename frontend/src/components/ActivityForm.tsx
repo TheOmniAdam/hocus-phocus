@@ -40,31 +40,31 @@ function ActivityForm({ onAddActivity }: ActivityFormProps) {
 
             <label>
             Activity
-            &nbsp;<input
+            <input
                 type="text"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
             />
-            </label> <br />
+            </label>
 
             <label>
             Category
-            &nbsp;<input
+            <input
                 type="text"
                 value={category}
                 onChange={(event) => setCategory(event.target.value)}
             />
-            </label> <br />
+            </label>
 
             <label>
             Minutes
-            &nbsp;<input
+            <input
                 type="number"
                 min="1"
                 value={duration}
                 onChange={(event) => setDuration(event.target.value)}
             />
-            </label> <br />
+            </label>
 
             <button type="submit">Add Activity</button>
         </form>
