@@ -35,10 +35,10 @@ export default function Pod({
 
     return () => observer.disconnect()
   }, [])
-  
+
   const previewScale = 0.5
   const previewHeight = Math.min(
-    350,
+    650,
     Math.max(120, contentHeight * previewScale)
   )
 
@@ -46,6 +46,7 @@ export default function Pod({
     <section
       className={`workspace-pod workspace-pod--${presentation}`}
       aria-label={title}
+      style={{ viewTransitionName: `pod-${id}` }}
     >
       <header className="workspace-pod__header">
         <h2>{title}</h2>

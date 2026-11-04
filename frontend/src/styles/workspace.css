@@ -1,4 +1,4 @@
-.workspace {
+.workspace--foreground {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-4);
@@ -19,13 +19,15 @@
 }
 
 .workspace-pod--focused {
-  grid-column: 1 / -1;
-  grid-row: 1;
   box-shadow: var(--shadow-card);
 }
 
+.workspace--foreground .workspace-pod--focused {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
 .workspace-pod--background {
-  height: 260px;
   opacity: 0.75;
   background: var(--color-surface-background);
 }
@@ -59,7 +61,6 @@
 
 .workspace-pod--background .workspace-pod__viewport {
   overflow: hidden;
-  height: 175px;
 }
 
 .workspace-pod--background .workspace-pod__content {
@@ -105,7 +106,7 @@
 }
 
 @media (max-width: 600px) {
-  .workspace {
+  .workspace--foreground {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -155,4 +156,24 @@
   .workspace-pod--background {
     transition: none;
   }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 300ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0ms;
+  }
+}
+
+.workspace--carousel {
+  /* All pods move along fixed positions */
+}
+
+.workspace--floating {
+  /* Pods move freely within a spatial canvas */
 }
