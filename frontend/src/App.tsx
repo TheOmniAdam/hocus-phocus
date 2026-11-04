@@ -226,10 +226,12 @@ function App() {
 
     <main>
       <Workspace
+        layout="orbit"
         pods={[
           {
             id: 'planner',
             title: 'Daily Planner',
+            appearance: 'farm-barn',
             content: (
               <div className="planner-content">
                 <div className="planner-date">
@@ -278,6 +280,7 @@ function App() {
           {
             id: 'todo',
             title: 'General To-Do',
+            appearance: 'farm-greenhouse',
             content: (
               <div>
                 <p>Your general task list will live here.</p>
@@ -287,6 +290,7 @@ function App() {
           {
             id: 'templates',
             title: 'Templates',
+            appearance: 'farm-red',
             content: (
               <div>
                 <p>Reusable activity templates will live here.</p>

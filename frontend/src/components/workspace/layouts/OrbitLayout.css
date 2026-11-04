@@ -1,0 +1,39 @@
+.orbit-workspace {
+  position: relative;
+  overflow: visible;
+}
+
+.orbit-workspace__slot {
+  position: absolute;
+  width: min(70%, 850px);
+  transition:
+    left 650ms ease-in-out,
+    top 650ms ease-in-out,
+    transform 650ms ease-in-out,
+    opacity 650ms ease-in-out;
+}
+
+.orbit-workspace__slot .workspace-pod {
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .orbit-workspace {
+    min-height: 650px;
+  }
+
+  .orbit-workspace__slot {
+    width: 90%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit-workspace__slot {
+    transition: none;
+  }
+}
+
+.orbit-workspace {
+  position: relative;
+  overflow: visible;
+}

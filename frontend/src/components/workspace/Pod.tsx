@@ -7,6 +7,7 @@ type PodProps = {
   id: string
   title: string
   presentation: PodPresentation
+  appearance?: string
   onFocus: (id: string) => void
   children: ReactNode
 }
@@ -15,6 +16,7 @@ export default function Pod({
   id,
   title,
   presentation,
+  appearance,
   onFocus,
   children,
 }: PodProps) {
@@ -44,7 +46,11 @@ export default function Pod({
 
   return (
     <section
-      className={`workspace-pod workspace-pod--${presentation}`}
+      className={[
+        'workspace-pod',
+        `workspace-pod--${presentation}`,
+        appearance ? `workspace-pod--${appearance}` : '',
+      ].filter(Boolean).join(' ')}
       aria-label={title}
       style={{ viewTransitionName: `pod-${id}` }}
     >
@@ -54,11 +60,10 @@ export default function Pod({
 
       <div 
         className="workspace-pod__viewport"
-        style={
-          isFocused
-            ? undefined
-            : { height: `${previewHeight}px` }
-        }
+        style={{
+          viewTransitionName: `pod-content-${id}`,
+          ...(isFocused ? {} : { height: `${previewHeight}px` }),
+        }}
       >
         <div
           className="workspace-pod__content"

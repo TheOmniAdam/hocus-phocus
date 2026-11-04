@@ -29,7 +29,6 @@
 
 .workspace-pod--background {
   opacity: 0.75;
-  background: var(--color-surface-background);
 }
 
 .workspace-pod--background:hover,
@@ -170,10 +169,132 @@
   }
 }
 
+::view-transition-group(*) {
+  animation-duration: 450ms;
+  animation-timing-function: ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*) {
+    animation-duration: 0ms;
+  }
+}
+
+.workspace--foreground .workspace__track {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
 .workspace--carousel {
-  /* All pods move along fixed positions */
+  width: 100%;
+  overflow: hidden;
+}
+
+.workspace--carousel .workspace__track {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  transition: transform 450ms ease-in-out;
+}
+
+.workspace--carousel .workspace-pod {
+  flex: 0 0 70%;
+}
+
+/* Foreground grid positioning shouldn't apply here */
+.workspace--carousel .workspace-pod--focused {
+  grid-column: auto;
+  grid-row: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace--carousel .workspace__track {
+    transition: none;
+  }
 }
 
 .workspace--floating {
   /* Pods move freely within a spatial canvas */
+}
+
+
+/* Default appearance */
+.workspace-pod {
+  background: var(--pod-background, var(--color-surface));
+  border: var(--pod-border, 1px solid var(--color-border));
+  color: var(--pod-text, var(--color-text));
+  --pod-heading: var(--pod-text, var(--color-text));
+  --pod-accent: var(--color-accent);
+}
+
+.workspace-pod .activity-card__details {
+  color: var(--pod-text, var(--color-text));
+}
+
+.workspace-pod .activity-card__details p:first-child {
+  color: var(--activity-card-text, #26352b);
+  font-weight: 700;
+}
+
+/* Farm appearances */
+.workspace-pod--farm-red {
+  --pod-background: #8f3434;
+  --pod-border: 3px solid #642525;
+  --pod-text: #fff5e8;
+}
+
+.workspace-pod--farm-barn {
+  --pod-background: #e8d4b3;
+  --pod-border: 3px solid #9b754d;
+  --pod-text: #382b1e;
+}
+
+/* FARM: SILO */
+.workspace-pod--farm-silo {
+  --pod-background: #e7dcc5;
+  --pod-border: 3px solid #8b806b;
+  --pod-text: #354840;
+  --pod-heading: #263c34;
+  --pod-accent: #55756b;
+}
+
+/* FARM: COWHIDE */
+.workspace-pod--farm-cowskin {
+  --pod-background: #f6f0e4;
+  --pod-border: 3px solid #45423e;
+  --pod-text: #34312e;
+  --pod-heading: #282522;
+  --pod-accent: #765a48;
+
+  background-image:
+    radial-gradient(ellipse at 88% 12%, #45423e 0 7%, transparent 7.5%),
+    radial-gradient(ellipse at 10% 90%, #45423e 0 9%, transparent 9.5%),
+    radial-gradient(ellipse at 96% 80%, #45423e 0 5%, transparent 5.5%);
+}
+
+/* FARM: GREENHOUSE */
+.workspace-pod--farm-greenhouse {
+  --pod-background: #e3e9cf;
+  --pod-border: 3px solid #697d4e;
+  --pod-text: #34492d;
+  --pod-heading: #263b23;
+  --pod-accent: #55723d;
+
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 90px,
+      rgb(67 103 68 / 9%) 91px 94px
+    );
+}
+
+
+
+
+.workspace-pod--space-station {
+  --pod-background: #20283d;
+  --pod-border: 2px solid #5d82b8;
+  --pod-text: #e9f2ff;
 }

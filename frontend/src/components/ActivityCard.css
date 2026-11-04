@@ -51,10 +51,13 @@
   background: var(--color-surface-background);
 }
 
-.activity-card__actions button:first-child {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: white;
+.workspace-pod .activity-card__details {
+  color: var(--activity-card-text);
+}
+
+.workspace-pod .activity-card__details p:first-child {
+  color: var(--activity-card-text);
+  font-weight: 700;
 }
 
 @media (max-width: 480px) {
@@ -65,4 +68,8 @@
   .activity-card__actions button {
     flex: 1 1 auto;
   }
+}
+
+.activity-card {
+  --activity-card-text: #26352b;
 }
